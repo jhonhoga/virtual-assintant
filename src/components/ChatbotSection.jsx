@@ -13,63 +13,78 @@ const ChatbotSection = () => {
   // Estilos personalizados
   const styles = {
     chatContainer: {
-      backgroundColor: '#f5f5f5', // Fondo gris claro
+      backgroundColor: '#f5f5f5',
       padding: '20px',
-      height: '100%',
-      overflowY: 'auto'
+      height: 'calc(100vh - 300px)',
+      overflowY: 'auto',
+      display: 'flex',
+      flexDirection: 'column'
     },
     messageContainer: {
       display: 'flex',
       flexDirection: 'column',
-      gap: '10px'
+      gap: '10px',
+      marginBottom: '10px',
+      flexGrow: 1
     },
     botMessage: {
-      backgroundColor: '#ffffff', // Fondo blanco para mensajes del bot
-      color: '#000000', // Texto negro para mensajes del bot
+      backgroundColor: '#ffffff',
+      color: '#000000',
       padding: '10px 15px',
       borderRadius: '15px',
       maxWidth: '80%',
       alignSelf: 'flex-start',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+      marginBottom: '10px'
     },
     userMessage: {
-      backgroundColor: '#616161', // Gris oscuro para mensajes del usuario
-      color: '#ffffff', // Texto blanco para mensajes del usuario
+      backgroundColor: '#616161',
+      color: '#ffffff',
       padding: '10px 15px',
       borderRadius: '15px',
       maxWidth: '80%',
       alignSelf: 'flex-end',
-      boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
+      boxShadow: '0 1px 2px rgba(0,0,0,0.1)',
+      marginBottom: '10px'
+    },
+    inputContainer: {
+      position: 'sticky',
+      bottom: 0,
+      backgroundColor: '#f5f5f5',
+      padding: '10px 0',
+      marginTop: 'auto'
     }
   };
+
+  // Inicializar el chat con un mensaje de bienvenida
+  useEffect(() => {
+    if (messages.length === 0) {
+      setMessages([{
+        type: 'bot',
+        text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte?'
+      }]);
+    }
+  }, []);
 
   // Función para desplazarse al último mensaje
   const scrollToBottom = () => {
     if (chatContainerRef.current) {
-      const scrollHeight = chatContainerRef.current.scrollHeight;
-      const height = chatContainerRef.current.clientHeight;
-      const maxScrollTop = scrollHeight - height;
-      
       chatContainerRef.current.scrollTo({
-        top: maxScrollTop,
+        top: chatContainerRef.current.scrollHeight,
         behavior: 'smooth'
       });
     }
   };
 
-  // Desplazarse cuando se agregan nuevos mensajes
+  // Efecto para scroll automático cuando hay nuevos mensajes
   useEffect(() => {
     scrollToBottom();
   }, [messages]);
 
-  useEffect(() => {
-    handleInitialMessage();
-  }, []);
-
   const handleInitialMessage = () => {
     setMessages([{
       type: 'bot',
-      content: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'
+      text: '¡Hola! Soy tu asistente virtual. ¿En qué puedo ayudarte hoy?'
     }]);
     setShowOptions(true);
     setCurrentSearchType(null);
@@ -79,14 +94,14 @@ const ChatbotSection = () => {
   const handleUserInput = async (option) => {
     setMessages(prev => [...prev, {
       type: 'user',
-      content: option
+      text: option
     }]);
     setShowOptions(false);
 
     if (option === 'Terminar chat') {
       setMessages(prev => [...prev, {
         type: 'bot',
-        content: '¡Gracias por usar el asistente virtual! Iniciando una nueva conversación...'
+        text: '¡Gracias por usar el asistente virtual! Iniciando una nueva conversación...'
       }]);
       
       setTimeout(() => {
@@ -98,7 +113,7 @@ const ChatbotSection = () => {
     setCurrentSearchType(option === 'Consulta por radicado' ? 'radicado' : 'asunto');
     setMessages(prev => [...prev, {
       type: 'bot',
-      content: 'Por favor, ingresa el ' + (option === 'Consulta por radicado' ? 'número de radicado' : 'nombre del asunto') + ':'
+      text: 'Por favor, ingresa el ' + (option === 'Consulta por radicado' ? 'número de radicado' : 'nombre del asunto') + ':'
     }]);
   };
 
@@ -109,7 +124,7 @@ const ChatbotSection = () => {
     const searchTerm = inputText.trim();
     setMessages(prev => [...prev, {
       type: 'user',
-      content: searchTerm
+      text: searchTerm
     }]);
     setInputText('');
 
@@ -130,13 +145,13 @@ const ChatbotSection = () => {
       if (results.length === 0) {
         setMessages(prev => [...prev, {
           type: 'bot',
-          content: 'No se encontraron resultados para tu búsqueda.'
+          text: 'No se encontraron resultados para tu búsqueda.'
         }]);
       } else {
         results.forEach(result => {
           setMessages(prev => [...prev, {
             type: 'bot',
-            content: (
+            text: (
               <Card variant="outlined" className="w-full my-2">
                 <CardContent>
                   <Typography variant="h6" component="div">
@@ -181,7 +196,7 @@ const ChatbotSection = () => {
 
       setMessages(prev => [...prev, {
         type: 'bot',
-        content: '¿Hay algo más en lo que pueda ayudarte?'
+        text: '¿Hay algo más en lo que pueda ayudarte?'
       }]);
       setShowOptions(true);
       setCurrentSearchType(null);
@@ -190,7 +205,7 @@ const ChatbotSection = () => {
       console.error('Error al realizar la busqueda:', error);
       setMessages(prev => [...prev, {
         type: 'bot',
-        content: 'Lo siento, ocurrió un error al procesar tu solicitud.'
+        text: 'Lo siento, ocurrió un error al procesar tu solicitud.'
       }]);
       setShowOptions(true);
       setCurrentSearchType(null);
@@ -198,85 +213,86 @@ const ChatbotSection = () => {
   };
 
   return (
-    <Paper 
-      elevation={3} 
-      sx={{ 
-        height: '100%',
-        display: 'flex',
-        flexDirection: 'column',
-        backgroundColor: styles.chatContainer.backgroundColor
-      }}
-    >
-      <div 
-        ref={chatContainerRef}
-        style={styles.chatContainer}
-      >
+    <Paper elevation={3} sx={{ height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
+      <div ref={chatContainerRef} style={styles.chatContainer}>
         <div style={styles.messageContainer}>
           {messages.map((message, index) => (
             <div
               key={index}
-              style={message.type === 'bot' ? styles.botMessage : styles.userMessage}
+              style={message.type === 'user' ? styles.userMessage : styles.botMessage}
             >
-              {typeof message.content === 'string' ? (
-                message.content
-              ) : (
-                message.content
+              <Typography>{message.text}</Typography>
+              {message.results && (
+                <div style={{ marginTop: '10px' }}>
+                  {message.results.map((result, idx) => (
+                    <Card key={idx} sx={{ marginTop: 1, marginBottom: 1 }}>
+                      <CardContent>
+                        <Typography variant="h6">Radicado: {result.radicado}</Typography>
+                        <Typography>Asunto: {result.nombredelasunto}</Typography>
+                        <Typography>Estado: {result.estado}</Typography>
+                        <Typography>Fecha: {result.fecha}</Typography>
+                        {result.enlace && (
+                          <Link href={result.enlace} target="_blank" rel="noopener">
+                            Ver documento
+                          </Link>
+                        )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
               )}
             </div>
           ))}
         </div>
 
-        {/* Barra de entrada */}
-        <form 
-          onSubmit={handleSubmit}
-          className="flex gap-2 mt-auto w-full pt-4"
-        >
-          <TextField
-            fullWidth
-            size="small"
-            value={inputText}
-            onChange={(e) => setInputText(e.target.value)}
-            placeholder="Escribe tu búsqueda..."
-            disabled={!currentSearchType}
-            className="flex-1"
-          />
-          <IconButton 
-            type="submit" 
-            color="primary"
-            disabled={!currentSearchType || !inputText.trim()}
-            className="min-w-[40px]"
-          >
-            <SendIcon />
-          </IconButton>
-        </form>
-
-        {showOptions && (
-          <div className="p-2">
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{ mb: 1 }}
-              onClick={() => handleUserInput('Consulta por radicado')}
-            >
-              1. CONSULTA POR RADICADO
-            </Button>
-            <Button
-              variant="contained"
-              fullWidth
-              sx={{ mb: 1 }}
-              onClick={() => handleUserInput('Consulta por asunto')}
-            >
-              2. CONSULTA POR ASUNTO
-            </Button>
-            <Button
-              variant="outlined"
-              fullWidth
-              onClick={() => handleUserInput('Terminar chat')}
-            >
-              3. TERMINAR CHAT
-            </Button>
-          </div>
-        )}
+        <div style={styles.inputContainer}>
+          {showOptions ? (
+            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleUserInput('Consulta por Radicado')}
+              >
+                Consulta por Radicado
+              </Button>
+              <Button
+                variant="contained"
+                color="primary"
+                onClick={() => handleUserInput('Consulta por Asunto')}
+              >
+                Consulta por Asunto
+              </Button>
+              <Button
+                variant="outlined"
+                onClick={() => handleUserInput('Terminar chat')}
+              >
+                Terminar chat
+              </Button>
+            </div>
+          ) : (
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <TextField
+                fullWidth
+                variant="outlined"
+                value={inputText}
+                onChange={(e) => setInputText(e.target.value)}
+                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
+                placeholder={
+                  currentSearchType === 'radicado'
+                    ? 'Ingrese el número de radicado'
+                    : 'Ingrese el asunto a buscar'
+                }
+              />
+              <IconButton
+                color="primary"
+                onClick={handleSubmit}
+                disabled={!inputText.trim()}
+              >
+                <SendIcon />
+              </IconButton>
+            </div>
+          )}
+        </div>
       </div>
     </Paper>
   );
