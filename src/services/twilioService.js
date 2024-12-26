@@ -1,6 +1,6 @@
 // API URL for the notification server
 const API_URL = import.meta.env.PROD 
-  ? 'https://your-notification-server.onrender.com'  // URL de producción
+  ? 'https://notification-server-zq81.onrender.com'  // URL de producción
   : 'http://localhost:3001';  // URL de desarrollo
 
 /**
@@ -12,6 +12,7 @@ const API_URL = import.meta.env.PROD
  */
 export const sendEventNotification = async (phoneNumber, eventDetails, timeUntilEvent) => {
   try {
+    console.log('Sending notification request to:', API_URL);
     const response = await fetch(`${API_URL}/api/send-notification`, {
       method: 'POST',
       headers: {
@@ -31,6 +32,7 @@ export const sendEventNotification = async (phoneNumber, eventDetails, timeUntil
     }
 
     const data = await response.json();
+    console.log('Server response:', data);
     return data.success;
   } catch (error) {
     console.error('Error sending SMS notification:', error);
