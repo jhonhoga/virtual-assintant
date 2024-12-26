@@ -29,6 +29,21 @@ app.use(cors({
 }));
 app.use(express.json());
 
+// Root endpoint
+app.get('/', (req, res) => {
+  res.json({ 
+    message: 'Notification Server is running',
+    version: '1.0.0',
+    endpoints: [
+      '/health',
+      '/api/send-notification'
+    ],
+    status: 'ok',
+    environment: process.env.NODE_ENV || 'development',
+    twilioConfigured: !!(accountSid && authToken && twilioPhoneNumber)
+  });
+});
+
 // Health check endpoint
 app.get('/health', (req, res) => {
   res.json({ 
@@ -120,20 +135,37 @@ app.post('/api/send-notification', async (req, res) => {
   }
 });
 
-// Error handling middleware
-app.use((err, req, res, next) => {
-  console.error(err.stack);
-  res.status(500).json({ 
-    success: false, 
-    error: 'Internal server error' 
+// Not found handler
+app.use((req, res, next) => {
+  res.status(404).json({
+    status: 'error',
+    message: `Route ${req.url} not found`,
+    availableEndpoints: [
+      '/',
+      '/health',
+      '/api/send-notification'
+    ]
   });
 });
 
-app.listen(port, () => {
-  console.log(`Notification server running on port ${port}`);
-  console.log('Environment:', {
-    accountSid: accountSid ? '✓' : '✗',
-    authToken: authToken ? '✓' : '✗',
-    twilioPhone: twilioPhoneNumber ? '✓' : '✗'
+// Error handling middleware
+app.use((err, req, res, next) => {
+  console.error('Error occurred:', err);
+  res.status(500).json({ 
+    status: 'error',
+    message: 'Internal server error',
+    error: process.env.NODE_ENV === 'development' ? err.message : 'An error occurred'
   });
+});
+
+// Start server
+app.listen(port, () => {
+  console.log(`
+    🚀 Notification server running on port ${port}
+    📱 Environment: ${process.env.NODE_ENV || 'development'}
+    ✉️ Twilio Configuration:
+      - Account SID: ${accountSid ? '✓' : '✗'}
+      - Auth Token: ${authToken ? '✓' : '✗'}
+      - Phone Number: ${twilioPhoneNumber ? '✓' : '✗'}
+  `);
 });
