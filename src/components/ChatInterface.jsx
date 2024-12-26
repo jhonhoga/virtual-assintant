@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useRef, useEffect } from 'react';
 import { 
   Paper, 
   Typography, 
@@ -20,6 +20,15 @@ const ChatInterface = () => {
   const [loading, setLoading] = useState(false);
   const [inputValue, setInputValue] = useState('');
   const [currentOption, setCurrentOption] = useState(null);
+  const messagesEndRef = useRef(null);
+
+  const scrollToBottom = () => {
+    messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+  };
+
+  useEffect(() => {
+    scrollToBottom();
+  }, [messages]);
 
   const ResultCard = ({ result }) => (
     <Card className="mb-4">
@@ -130,45 +139,69 @@ const ChatInterface = () => {
   };
 
   return (
-    <Paper className="h-full p-4 flex flex-col">
-      <div className="flex-grow overflow-y-auto mb-4">
+    <Paper 
+      elevation={3} 
+      className="p-4 h-[calc(100vh-200px)] flex flex-col"
+      sx={{
+        display: 'flex',
+        flexDirection: 'column',
+        height: 'calc(100vh - 200px)',
+        maxHeight: 'calc(100vh - 200px)',
+      }}
+    >
+      <Typography variant="h5" className="mb-4">
+        Chat con Asistente Virtual
+      </Typography>
+      
+      <div 
+        className="flex-grow overflow-y-auto mb-4 p-4"
+        style={{
+          display: 'flex',
+          flexDirection: 'column',
+          gap: '1rem',
+          overflowY: 'auto',
+          scrollBehavior: 'smooth'
+        }}
+      >
         {messages.map((message, index) => (
-          <div key={index} className={`mb-4 ${message.type === 'user' ? 'text-right' : ''}`}>
-            <div className={`inline-block p-3 rounded-lg ${
-              message.type === 'user' 
-                ? 'bg-primary text-white' 
-                : 'bg-slate-50'
-            }`}>
-              <Typography>{message.content}</Typography>
-              
-              {message.results && message.results.map((result, idx) => (
-                <ResultCard key={idx} result={result} />
-              ))}
-
-              {message.options && !message.isEnding && (
-                <div className="mt-3">
-                  {message.options.map((option, idx) => (
-                    <Button
-                      key={idx}
-                      variant="contained"
-                      color="primary"
-                      size="small"
-                      className="mr-2 mb-2"
-                      onClick={() => handleOptionSelect(option)}
-                    >
-                      {option}
-                    </Button>
-                  ))}
-                </div>
-              )}
-            </div>
+          <div key={index} className={`message ${message.type}`}>
+            <Typography 
+              variant="body1" 
+              className="mb-2"
+              sx={{
+                backgroundColor: message.type === 'user' ? '#e3f2fd' : '#f5f5f5',
+                padding: '1rem',
+                borderRadius: '8px',
+                maxWidth: '80%',
+                alignSelf: message.type === 'user' ? 'flex-end' : 'flex-start'
+              }}
+            >
+              {message.content}
+            </Typography>
+            
+            {message.results && message.results.map((result, idx) => (
+              <ResultCard key={idx} result={result} />
+            ))}
+            
+            {message.options && !message.isEnding && (
+              <div className="flex flex-wrap gap-2 mt-2">
+                {message.options.map((option, idx) => (
+                  <Button
+                    key={idx}
+                    variant="outlined"
+                    color="primary"
+                    onClick={() => handleOptionSelect(option)}
+                    disabled={loading}
+                    className="mb-2"
+                  >
+                    {option}
+                  </Button>
+                ))}
+              </div>
+            )}
           </div>
         ))}
-        {loading && (
-          <div className="text-center">
-            <CircularProgress size={24} />
-          </div>
-        )}
+        <div ref={messagesEndRef} />
       </div>
 
       {!messages[messages.length - 1].isEnding && (
