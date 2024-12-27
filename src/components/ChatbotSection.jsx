@@ -92,11 +92,11 @@ const ChatbotSection = () => {
   };
 
   const handleUserInput = async (option) => {
-    setMessages(prev => [...prev, {
+    const userMessage = {
       type: 'user',
       text: option
-    }]);
-    setShowOptions(false);
+    };
+    setMessages(prev => [...prev, userMessage]);
 
     if (option === 'Terminar chat') {
       setMessages(prev => [...prev, {
@@ -110,103 +110,76 @@ const ChatbotSection = () => {
       return;
     }
 
-    setCurrentSearchType(option === 'Consulta por radicado' ? 'radicado' : 'asunto');
-    setMessages(prev => [...prev, {
+    const searchType = option === 'Consulta por Radicado' ? 'radicado' : 'asunto';
+    setCurrentSearchType(searchType);
+    setShowOptions(false);
+
+    const botResponse = {
       type: 'bot',
-      text: 'Por favor, ingresa el ' + (option === 'Consulta por radicado' ? 'número de radicado' : 'nombre del asunto') + ':'
-    }]);
+      text: `Por favor, ingresa ${searchType === 'radicado' ? 'el número de radicado' : 'el asunto'} a buscar:`
+    };
+    setMessages(prev => [...prev, botResponse]);
   };
 
   const handleSubmit = async (e) => {
-    e?.preventDefault();
-    if (!inputText.trim() || !currentSearchType) return;
+    if (e) e.preventDefault();
+    if (!inputText.trim()) return;
 
     const searchTerm = inputText.trim();
-    setMessages(prev => [...prev, {
+    const userMessage = {
       type: 'user',
       text: searchTerm
-    }]);
+    };
+    setMessages(prev => [...prev, userMessage]);
     setInputText('');
 
     try {
-      const data = await fetchSheetData(SHEET_NAMES.CASOS);
-      let results;
-      
+      const data = await fetchSheetData(SHEET_NAMES.RADICADOS);
+      let results = [];
+
       if (currentSearchType === 'radicado') {
-        results = data.filter(row => 
-          row.radicado && row.radicado.toString().toLowerCase() === searchTerm.toLowerCase()
+        results = data.filter(item => 
+          item.radicado && item.radicado.toString().toLowerCase() === searchTerm.toLowerCase()
         );
       } else {
-        results = data.filter(row =>
-          row.nombredelasunto && row.nombredelasunto.toLowerCase().includes(searchTerm.toLowerCase())
+        results = data.filter(item =>
+          item.nombredelasunto && 
+          item.nombredelasunto.toLowerCase().includes(searchTerm.toLowerCase())
         );
       }
 
       if (results.length === 0) {
-        setMessages(prev => [...prev, {
+        const noResultsMessage = {
           type: 'bot',
-          text: 'No se encontraron resultados para tu búsqueda.'
-        }]);
+          text: `No se encontraron resultados para ${currentSearchType === 'radicado' ? 'el radicado' : 'el asunto'} "${searchTerm}"`
+        };
+        setMessages(prev => [...prev, noResultsMessage]);
       } else {
-        results.forEach(result => {
-          setMessages(prev => [...prev, {
-            type: 'bot',
-            text: (
-              <Card variant="outlined" className="w-full my-2">
-                <CardContent>
-                  <Typography variant="h6" component="div">
-                    Radicado: {result.radicado}
-                  </Typography>
-                  <Typography color="textSecondary">
-                    Nombre del Asunto: {result.nombredelasunto}
-                  </Typography>
-                  <Typography>
-                    Estado: {result.estado}
-                  </Typography>
-                  <Typography>
-                    Asignado a: {result.asignadoa}
-                  </Typography>
-                  <Typography>
-                    Fecha: {result.fecha}
-                  </Typography>
-                  <Typography>
-                    Fecha estimada respuesta: {result.fechaestimadarespuesta}
-                  </Typography>
-                  {result.respuesta && (
-                    <Typography>
-                      Respuesta: {result.respuesta}
-                    </Typography>
-                  )}
-                  {result.enlace && (
-                    <Link 
-                      href={result.enlace}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                      className="block mt-2"
-                    >
-                      Ver detalles
-                    </Link>
-                  )}
-                </CardContent>
-              </Card>
-            )
-          }]);
-        });
+        const resultsMessage = {
+          type: 'bot',
+          text: `Se encontraron ${results.length} resultado(s):`,
+          results: results
+        };
+        setMessages(prev => [...prev, resultsMessage]);
       }
 
-      setMessages(prev => [...prev, {
-        type: 'bot',
-        text: '¿Hay algo más en lo que pueda ayudarte?'
-      }]);
-      setShowOptions(true);
-      setCurrentSearchType(null);
+      // Preguntar si desea realizar otra consulta
+      setTimeout(() => {
+        setMessages(prev => [...prev, {
+          type: 'bot',
+          text: '¿Deseas realizar otra consulta?'
+        }]);
+        setShowOptions(true);
+        setCurrentSearchType(null);
+      }, 1000);
 
     } catch (error) {
-      console.error('Error al realizar la busqueda:', error);
-      setMessages(prev => [...prev, {
+      console.error('Error al realizar la búsqueda:', error);
+      const errorMessage = {
         type: 'bot',
-        text: 'Lo siento, ocurrió un error al procesar tu solicitud.'
-      }]);
+        text: 'Lo siento, ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.'
+      };
+      setMessages(prev => [...prev, errorMessage]);
       setShowOptions(true);
       setCurrentSearchType(null);
     }
