@@ -1,4 +1,6 @@
-import { VITE_GOOGLE_SHEETS_ID, VITE_GOOGLE_API_KEY } from '../config';
+// Constantes para Google Sheets
+const SPREADSHEET_ID = import.meta.env.VITE_GOOGLE_SHEETS_ID;
+const API_KEY = import.meta.env.VITE_GOOGLE_API_KEY;
 
 // Nombres exactos de las hojas en el documento
 export const SHEET_NAMES = {
@@ -29,7 +31,7 @@ const COLUMN_MAPPING = {
 export const fetchSheetData = async (sheetName) => {
   try {
     const response = await fetch(
-      `https://sheets.googleapis.com/v4/spreadsheets/${VITE_GOOGLE_SHEETS_ID}/values/${sheetName}?key=${VITE_GOOGLE_API_KEY}`
+      `https://sheets.googleapis.com/v4/spreadsheets/${SPREADSHEET_ID}/values/${sheetName}?key=${API_KEY}`
     );
 
     if (!response.ok) {
