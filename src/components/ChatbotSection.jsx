@@ -123,18 +123,17 @@ const ChatbotSection = () => {
 
   const handleSubmit = async (e) => {
     if (e) e.preventDefault();
-    if (!inputText.trim()) return;
+    if (!inputText.trim() || !currentSearchType) return;
 
     const searchTerm = inputText.trim();
-    const userMessage = {
+    setMessages(prev => [...prev, {
       type: 'user',
       text: searchTerm
-    };
-    setMessages(prev => [...prev, userMessage]);
+    }]);
     setInputText('');
 
     try {
-      const data = await fetchSheetData(SHEET_NAMES.RADICADOS);
+      const data = await fetchSheetData(SHEET_NAMES.CASOS);
       let results = [];
 
       if (currentSearchType === 'radicado') {
@@ -149,11 +148,10 @@ const ChatbotSection = () => {
       }
 
       if (results.length === 0) {
-        const noResultsMessage = {
+        setMessages(prev => [...prev, {
           type: 'bot',
           text: `No se encontraron resultados para ${currentSearchType === 'radicado' ? 'el radicado' : 'el asunto'} "${searchTerm}"`
-        };
-        setMessages(prev => [...prev, noResultsMessage]);
+        }]);
       } else {
         const resultsMessage = {
           type: 'bot',
@@ -175,11 +173,10 @@ const ChatbotSection = () => {
 
     } catch (error) {
       console.error('Error al realizar la búsqueda:', error);
-      const errorMessage = {
+      setMessages(prev => [...prev, {
         type: 'bot',
         text: 'Lo siento, ocurrió un error al procesar tu solicitud. Por favor, intenta nuevamente.'
-      };
-      setMessages(prev => [...prev, errorMessage]);
+      }]);
       setShowOptions(true);
       setCurrentSearchType(null);
     }
