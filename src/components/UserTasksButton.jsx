@@ -103,7 +103,7 @@ const UserTasksButton = () => {
         style={{
           position: 'fixed',
           bottom: 160,
-          right: 16,
+          left: 16,
           zIndex: 1000
         }}
         onClick={handleClick}

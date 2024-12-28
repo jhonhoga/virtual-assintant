@@ -61,8 +61,8 @@ function App() {
             className={`
               fixed z-20 transition-all duration-300
               ${isMobile 
-                ? 'bottom-3 right-4' 
-                : 'top-4 right-4'}
+                ? 'bottom-3 left-4' 
+                : 'top-4 left-4'}
             `}
             size={isMobile ? "medium" : "large"}
           >
