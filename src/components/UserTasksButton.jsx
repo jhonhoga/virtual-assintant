@@ -102,7 +102,7 @@ const UserTasksButton = () => {
         aria-label="user tasks"
         style={{
           position: 'fixed',
-          bottom: 90,
+          bottom: 160,
           right: 16,
           zIndex: 1000
         }}
