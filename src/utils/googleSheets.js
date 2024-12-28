@@ -73,11 +73,46 @@ export async function fetchSheetData(sheetName) {
     const data = rows.slice(1).map(row => {
       const item = {};
       headers.forEach((header, index) => {
-        const mappedKey = COLUMN_MAPPING[header] || header.toLowerCase().replace(/ /g, '');
-        item[mappedKey] = row[index] || '';
+        // Normalizar el encabezado para la comparación
+        const normalizedHeader = header.toLowerCase().trim();
+        let key;
+        
+        // Mapeo específico de encabezados
+        switch (normalizedHeader) {
+          case 'radicado':
+            key = 'radicado';
+            break;
+          case 'nombre del asunto':
+            key = 'nombredelasunto';
+            break;
+          case 'asignado a':
+            key = 'asignadoa';
+            break;
+          case 'estado':
+            key = 'estado';
+            break;
+          case 'fecha':
+            key = 'fecha';
+            break;
+          case 'fecha estimada respuesta':
+            key = 'fechaestimadarespuesta';
+            break;
+          case 'respuesta':
+            key = 'respuesta';
+            break;
+          case 'enlace':
+            key = 'enlace';
+            break;
+          default:
+            key = normalizedHeader.replace(/ /g, '');
+        }
+        
+        item[key] = row[index] || '';
       });
       return item;
     });
+
+    console.log('Datos procesados:', data); // Debug log
 
     return data;
   } catch (error) {

@@ -50,14 +50,23 @@ const UserTasksButton = () => {
     
     try {
       const data = await fetchSheetData(SHEET_NAMES.CASOS);
+      console.log('Datos obtenidos:', data); // Debug log
       const userTasks = data
-        .filter(item => 
-          item.asignadoa === user && 
-          item.estado?.toLowerCase() === 'sin respuesta'
-        )
-        .sort((a, b) => new Date(b.fecha) - new Date(a.fecha))
+        .filter(item => {
+          console.log('Revisando item:', item); // Debug log
+          return (
+            item.asignadoa?.toLowerCase() === user.toLowerCase() && 
+            item.estado?.toLowerCase() === 'sin respuesta'
+          );
+        })
+        .sort((a, b) => {
+          const dateA = new Date(a.fecha?.split('/').reverse().join('-'));
+          const dateB = new Date(b.fecha?.split('/').reverse().join('-'));
+          return dateB - dateA;
+        })
         .slice(0, 10);
 
+      console.log('Tareas filtradas:', userTasks); // Debug log
       setTasks(userTasks);
       setDialogOpen(true);
     } catch (error) {
