@@ -3,6 +3,7 @@ import { Fab, useMediaQuery, useTheme } from '@mui/material';
 import EventIcon from '@mui/icons-material/Event';
 import ChatbotSection from './components/ChatbotSection';
 import EventsSection from './components/EventsSection';
+import UserTasksButton from './components/UserTasksButton';
 import { startNotificationService } from './services/notificationService';
 
 function App() {
@@ -67,6 +68,7 @@ function App() {
           >
             <EventIcon />
           </Fab>
+          <UserTasksButton />
         </div>
       </main>
 
