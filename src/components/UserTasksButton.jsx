@@ -19,16 +19,16 @@ import PersonIcon from '@mui/icons-material/Person';
 import CloseIcon from '@mui/icons-material/Close';
 import { fetchSheetData, SHEET_NAMES } from '../utils/googleSheets';
 
-const USERS = [
-  'Jorge V',
-  'Diana S',
-  'Monica',
-  'Maria A',
-  'Nelcy',
-  'Jhon',
-  'Estefani',
-  'Daniela'
-];
+const USERS = {
+  'Jorge V': 'JORGE VALLE',
+  'Diana S': 'DIANA SERRANO',
+  'Monica': 'MONICA',
+  'Maria A': 'MARIA A',
+  'Nelcy': 'NELCY',
+  'Jhon': 'JHON',
+  'Estefani': 'ESTEFANI',
+  'Daniela': 'DANIELA'
+};
 
 const UserTasksButton = () => {
   const [anchorEl, setAnchorEl] = useState(null);
@@ -50,23 +50,38 @@ const UserTasksButton = () => {
     
     try {
       const data = await fetchSheetData(SHEET_NAMES.CASOS);
-      console.log('Datos obtenidos:', data); // Debug log
+      console.log('Datos obtenidos:', data);
+
+      // Obtener el nombre completo del usuario del mapeo
+      const fullName = USERS[user].trim().toUpperCase();
+      
       const userTasks = data
         .filter(item => {
-          console.log('Revisando item:', item); // Debug log
-          return (
-            item.asignadoa?.toLowerCase() === user.toLowerCase() && 
-            item.estado?.toLowerCase() === 'sin respuesta'
-          );
+          console.log('Revisando item:', item);
+          const assignedTo = (item.asignadoa || '').trim().toUpperCase();
+          const status = (item.estado || '').trim().toLowerCase();
+          
+          // Verificar si el usuario coincide y el estado es "sin respuesta"
+          const isAssignedToUser = assignedTo === fullName;
+          const isPending = status === 'sin respuesta';
+          
+          console.log(`Comparando: "${assignedTo}" con "${fullName}" - Asignado: ${isAssignedToUser}, Pendiente: ${isPending}`);
+          
+          return isAssignedToUser && isPending;
         })
         .sort((a, b) => {
-          const dateA = new Date(a.fecha?.split('/').reverse().join('-'));
-          const dateB = new Date(b.fecha?.split('/').reverse().join('-'));
-          return dateB - dateA;
+          // Convertir fechas en formato dd/mm/yyyy a objetos Date
+          const parseDate = (dateStr) => {
+            if (!dateStr) return new Date(0);
+            const [day, month, year] = dateStr.split('/').map(num => parseInt(num, 10));
+            return new Date(year, month - 1, day);
+          };
+          
+          return parseDate(b.fecha) - parseDate(a.fecha);
         })
         .slice(0, 10);
 
-      console.log('Tareas filtradas:', userTasks); // Debug log
+      console.log('Tareas filtradas:', userTasks);
       setTasks(userTasks);
       setDialogOpen(true);
     } catch (error) {
@@ -109,7 +124,7 @@ const UserTasksButton = () => {
           horizontal: 'right',
         }}
       >
-        {USERS.map((user) => (
+        {Object.keys(USERS).map((user) => (
           <MenuItem 
             key={user} 
             onClick={() => handleUserSelect(user)}
