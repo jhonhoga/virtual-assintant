@@ -101,9 +101,7 @@ const UserTasksButton = () => {
         color="primary"
         aria-label="user tasks"
         style={{
-          position: 'fixed',
-          bottom: 160,
-          left: 16,
+          position: 'static',
           zIndex: 1000
         }}
         onClick={handleClick}

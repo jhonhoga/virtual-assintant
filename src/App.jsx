@@ -53,22 +53,22 @@ function App() {
             <EventsSection isVisible={showEvents} />
           </div>
 
-          {/* Floating button - ajusta posición en móvil */}
-          <Fab
-            color="primary"
-            aria-label="toggle events"
-            onClick={() => setShowEvents(!showEvents)}
-            className={`
-              fixed z-20 transition-all duration-300
-              ${isMobile 
-                ? 'bottom-3 left-4' 
-                : 'top-4 left-4'}
-            `}
-            size={isMobile ? "medium" : "large"}
-          >
-            <EventIcon />
-          </Fab>
-          <UserTasksButton />
+          {/* Floating buttons */}
+          <div className="fixed left-4 bottom-4 z-20 flex items-center space-x-4">
+            <Fab
+              color="primary"
+              aria-label="toggle events"
+              onClick={() => setShowEvents(!showEvents)}
+              className={`
+                transition-all duration-300
+                ${isMobile ? 'w-12 h-12' : 'w-14 h-14'}
+              `}
+              size={isMobile ? "medium" : "large"}
+            >
+              <EventIcon />
+            </Fab>
+            <UserTasksButton />
+          </div>
         </div>
       </main>
 
