@@ -1,6 +1,9 @@
 import { useState, useEffect, useRef } from 'react';
 import { Paper, Typography, Button, Card, CardContent, Link, TextField, IconButton } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import SearchIcon from '@mui/icons-material/Search'; // Icono para consulta
+import AssignmentIcon from '@mui/icons-material/Assignment'; // Icono para radicado
+import CloseIcon from '@mui/icons-material/Close'; // Icono para terminar chat
 import { fetchSheetData, SHEET_NAMES } from '../utils/googleSheets';
 
 const ChatbotSection = () => {
@@ -182,6 +185,49 @@ const ChatbotSection = () => {
     }
   };
 
+  // Renderizar opciones con iconos
+  const renderOptions = () => {
+    const options = [
+      { 
+        label: 'Consulta por Radicado', 
+        icon: <AssignmentIcon />,
+        color: 'primary'
+      },
+      { 
+        label: 'Consulta por Asunto', 
+        icon: <SearchIcon />,
+        color: 'secondary'
+      },
+      { 
+        label: 'Terminar chat', 
+        icon: <CloseIcon />,
+        color: 'error'
+      }
+    ];
+
+    return (
+      <div style={{ 
+        display: 'flex', 
+        flexDirection: 'column', 
+        gap: '10px', 
+        marginTop: '10px' 
+      }}>
+        {options.map((option, index) => (
+          <Button
+            key={index}
+            variant="contained"
+            color={option.color}
+            startIcon={option.icon}
+            onClick={() => handleUserInput(option.label)}
+            fullWidth
+          >
+            {option.label}
+          </Button>
+        ))}
+      </div>
+    );
+  };
+
   return (
     <Paper elevation={3} sx={{ height: 'calc(100vh - 200px)', display: 'flex', flexDirection: 'column' }}>
       <div ref={chatContainerRef} style={styles.chatContainer}>
@@ -215,54 +261,26 @@ const ChatbotSection = () => {
           ))}
         </div>
 
-        <div style={styles.inputContainer}>
-          {showOptions ? (
-            <div style={{ display: 'flex', gap: '10px', justifyContent: 'center' }}>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleUserInput('Consulta por Radicado')}
-              >
-                Consulta por Radicado
-              </Button>
-              <Button
-                variant="contained"
-                color="primary"
-                onClick={() => handleUserInput('Consulta por Asunto')}
-              >
-                Consulta por Asunto
-              </Button>
-              <Button
-                variant="outlined"
-                onClick={() => handleUserInput('Terminar chat')}
-              >
-                Terminar chat
-              </Button>
-            </div>
-          ) : (
-            <div style={{ display: 'flex', gap: '10px' }}>
-              <TextField
-                fullWidth
-                variant="outlined"
-                value={inputText}
-                onChange={(e) => setInputText(e.target.value)}
-                onKeyPress={(e) => e.key === 'Enter' && handleSubmit()}
-                placeholder={
-                  currentSearchType === 'radicado'
-                    ? 'Ingrese el número de radicado'
-                    : 'Ingrese el asunto a buscar'
-                }
-              />
-              <IconButton
-                color="primary"
-                onClick={handleSubmit}
-                disabled={!inputText.trim()}
-              >
-                <SendIcon />
-              </IconButton>
-            </div>
-          )}
-        </div>
+        {showOptions && renderOptions()}
+
+        {!showOptions && (
+          <form onSubmit={handleSubmit} style={styles.inputContainer}>
+            <TextField
+              fullWidth
+              variant="outlined"
+              value={inputText}
+              onChange={(e) => setInputText(e.target.value)}
+              placeholder={`Ingrese ${currentSearchType === 'radicado' ? 'el número de radicado' : 'el asunto'}`}
+              InputProps={{
+                endAdornment: (
+                  <IconButton type="submit" color="primary">
+                    <SendIcon />
+                  </IconButton>
+                )
+              }}
+            />
+          </form>
+        )}
       </div>
     </Paper>
   );
