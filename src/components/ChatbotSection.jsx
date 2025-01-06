@@ -4,6 +4,8 @@ import SendIcon from '@mui/icons-material/Send';
 import SearchIcon from '@mui/icons-material/Search'; // Icono para consulta
 import AssignmentIcon from '@mui/icons-material/Assignment'; // Icono para radicado
 import CloseIcon from '@mui/icons-material/Close'; // Icono para terminar chat
+import RobotIcon from '@mui/icons-material/SmartToy'; // Icono de robot para bot
+import PersonIcon from '@mui/icons-material/Person'; // Icono de usuario
 import { fetchSheetData, SHEET_NAMES } from '../utils/googleSheets';
 
 const ChatbotSection = () => {
@@ -235,28 +237,40 @@ const ChatbotSection = () => {
           {messages.map((message, index) => (
             <div
               key={index}
-              style={message.type === 'user' ? styles.userMessage : styles.botMessage}
+              style={{
+                ...( message.type === 'user' ? styles.userMessage : styles.botMessage ),
+                display: 'flex',
+                alignItems: 'center',
+                gap: '10px'
+              }}
             >
-              <Typography>{message.text}</Typography>
-              {message.results && (
-                <div style={{ marginTop: '10px' }}>
-                  {message.results.map((result, idx) => (
-                    <Card key={idx} sx={{ marginTop: 1, marginBottom: 1 }}>
-                      <CardContent>
-                        <Typography variant="h6">Radicado: {result.radicado}</Typography>
-                        <Typography>Asunto: {result.nombredelasunto}</Typography>
-                        <Typography>Estado: {result.estado}</Typography>
-                        <Typography>Fecha: {result.fecha}</Typography>
-                        {result.enlace && (
-                          <Link href={result.enlace} target="_blank" rel="noopener">
-                            Ver documento
-                          </Link>
-                        )}
-                      </CardContent>
-                    </Card>
-                  ))}
-                </div>
+              {message.type === 'bot' ? (
+                <RobotIcon color="primary" />
+              ) : (
+                <PersonIcon color="secondary" />
               )}
+              <div>
+                <Typography>{message.text}</Typography>
+                {message.results && (
+                  <div style={{ marginTop: '10px' }}>
+                    {message.results.map((result, idx) => (
+                      <Card key={idx} sx={{ marginTop: 1, marginBottom: 1 }}>
+                        <CardContent>
+                          <Typography variant="h6">Radicado: {result.radicado}</Typography>
+                          <Typography>Asunto: {result.nombredelasunto}</Typography>
+                          <Typography>Estado: {result.estado}</Typography>
+                          <Typography>Fecha: {result.fecha}</Typography>
+                          {result.enlace && (
+                            <Link href={result.enlace} target="_blank" rel="noopener">
+                              Ver documento
+                            </Link>
+                          )}
+                        </CardContent>
+                      </Card>
+                    ))}
+                  </div>
+                )}
+              </div>
             </div>
           ))}
         </div>

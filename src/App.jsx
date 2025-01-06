@@ -54,7 +54,7 @@ function App() {
           </div>
 
           {/* Floating buttons */}
-          <div className="fixed left-4 bottom-4 z-20 flex items-center space-x-4">
+          <div className="fixed left-4  z-20 flex items-center space-x-4">
             <Fab
               color="primary"
               aria-label="toggle events"
